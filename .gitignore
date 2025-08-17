@@ -1,0 +1,9 @@
+cookies.json
+.venv
+__pycache__
+
+
+# personal use
+
+.eternally_guild_files/*
+.legacy

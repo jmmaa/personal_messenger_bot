@@ -1,0 +1,6 @@
+[bot]
+
+prefix = ">"
+
+cookies_path = "cookies.json"
+
