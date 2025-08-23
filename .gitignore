@@ -4,6 +4,6 @@ __pycache__
 
 
 # personal use
-
 .eternally_guild_files/*
 .legacy
+scratch*

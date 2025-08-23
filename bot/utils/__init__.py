@@ -2,7 +2,7 @@ import tomllib
 import typing
 
 
-def load_config(path: str) -> dict[str, typing.Any]:
+def load_toml(path: str) -> dict[str, typing.Any]:
     try:
         with open(path, "rb") as f:
             data = tomllib.load(f)

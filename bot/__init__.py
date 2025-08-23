@@ -5,26 +5,17 @@ import typing
 from fbchat_muqit import Client, Message, ThreadType
 
 
-from bot.utils import load_config
-from bot.commands import CommandClient, CommandInput, CommandRegistry
-from bot.commands.food_buff import food_buff_command
+from bot.utils import load_toml
+from bot.commands import CommandClient, CommandInput
+from bot.plugins import food_buff, info
 
 
-def help_command(kwargs: CommandInput):
-    help = """/help
-    /addr stat:<stat here>
+def leveling_guide_command(kwargs: CommandInput):
+    pass
 
-    /guide gq
-    /guide graid
-    /guide lvl
-    /guide fbuff
 
-    LEGACY COMMANDS (to be removed soon): 
-
-    >addr <stat here>
-    """
-
-    return help
+def help_command(_):
+    pass
 
 
 async def main():
@@ -35,7 +26,7 @@ async def main():
     config_path = "./config.toml"
 
     try:
-        config = load_config(config_path)
+        config = load_toml(config_path)
 
         logging.debug(f"loaded config from '{config_path}'")
         logging.debug(config)
@@ -44,79 +35,58 @@ async def main():
         logging.error(f"cannot load config from '{config_path}': {e}")
         raise e
 
-    # build commands
+    def get_command_list_as_msg(_):
+        food_buff_data = load_toml("./food_buff_data.toml")
 
-    # add functionality to print the commands registered
-    registry: CommandRegistry = {
-        "help": {
-            "func": help_command,
-            "sub_commands": {},
-        },
-        "addr": {
-            "func": food_buff_command,
-            "sub_commands": {},
-        },
-        "guide": {
-            "func": lambda x: str(x) + " TORAAAAM",
-            "sub_commands": {
-                "gq": {
-                    "func": lambda x: str(x),
-                    "sub_commands": {},
-                },
-                "graid": {
-                    "func": lambda x: str(x),
-                    "sub_commands": {},
-                },
-                "lvl": {
-                    "func": lambda x: str(x),
-                    "sub_commands": {},
-                },
-                "fbuff": {
-                    "func": lambda x: str(x),
-                    "sub_commands": {},
-                },
-            },
-        },
-    }
+        return food_buff_data["food_buffs"]["help"]["text"]
 
-    command_client = CommandClient(registry=registry)
+    command_client = CommandClient(registry={})
 
-    logging.debug("registered commands")
+    command_client.register(food_buff.addr)
+    command_client.register(info.info)
+
+    logging.info("registered commands")
     logging.debug(f"command registry: {command_client.registry}")
 
     # while True:
-    #     inp = input("type cmd: ")
+    #     inp = input()
 
     #     if inp.startswith("/"):
-    #         print(command_client.execute(inp.replace("/", "")))
+    #         print("\n", command_client.execute(inp.replace("/", "")))
+
+    # TODO LATER
+
+    # COMMANDS
+    # ORGANIZE THE CODE
+    # MAYBE ADD CONTEXT INSTEAD OF COMMAND KWARGS ONLY
 
     class _Client(Client):
-        async def onPeopleAdded(
-            self,
-            mid=None,
-            added_ids=None,
-            author_id=None,
-            thread_id=None,
-            ts=None,
-            msg=None,
-        ):
-            await self.sendMessage(
-                """Welcome to Eternally Guild!
-                Please read the guidelines on the pictures below
-                """,
-                str(thread_id),
-                thread_type=ThreadType.GROUP,
-                mentions=added_ids,
-            )
-            await self.sendLocalFiles(
-                [
-                    "./.eternally_guild_files/3.jpg",
-                    "./.eternally_guild_files/2.jpg",
-                    "./.eternally_guild_files/1.jpg",
-                ],
-                thread_id=str(thread_id),
-                thread_type=ThreadType.GROUP,
-            )
+        # async def onPeopleAdded(
+        #     self,
+        #     mid=None,
+        #     added_ids=None,
+        #     author_id=None,
+        #     thread_id=None,
+        #     ts=None,
+        #     msg=None,
+        # ):
+        #     await self.sendMessage(
+        #         """Welcome to Eternally Guild!
+        #         Please read the guidelines on the pictures below
+        #         """,
+        #         str(thread_id),
+        #         thread_type=ThreadType.GROUP,
+        #         mentions=added_ids,
+        #     )
+        #     await self.sendLocalFiles(
+        #         [
+        #             "./.eternally_guild_files/3.jpg",
+        #             "./.eternally_guild_files/2.jpg",
+        #             "./.eternally_guild_files/1.jpg",
+        #         ],
+        #         thread_id=str(thread_id),
+        #         thread_type=ThreadType.GROUP,
+        #     )
 
         async def onMessage(
             self,
@@ -130,7 +100,6 @@ async def main():
             metadata=None,
             msg=None,
         ):
-            print(message)
             if message.startswith("/"):
                 result = command_client.execute(message.replace("/", ""))
 

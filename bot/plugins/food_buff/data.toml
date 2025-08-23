@@ -1,49 +1,48 @@
 
-help = """
->addr <stat here>|help
+[food_buffs.help]
 
-Options for <stat here>
-
-maxhp|hp|max hp
-maxmp|mp|max mp
-ampr
-crit|critrate|critical rate|crate|crit rate
-acc|accuracy
-dodge
-agi
-dex
-int
-vit
-str
-atk
-watk|weaponatk|weapon atk
-matk
-fractional barrier|fbar|fbarrier
-magic barrier|mbar|mbarrier
-physical barrier|pbar|pbarrier
-magic resistance|mres|mresist
-physical resistance|pres|presist
-def
-mdef
-+aggro|+agg|aggro|agg
--aggro|-agg
-dtedark|dtdark|dte dark
-dteearth|dtearth|dte earth
-dtelight|dtlight|dte light
-dtewater|dtwater|dte water
-dtewind|dtwind|dte wind
-dtefire|dtfire|dte fire
-dteneutral|dtneutral|dte neutral|dteneut|dte neut
-rtedark|rtdark|rte dark|darkres|darkresist
-rteearth|rtearth|rte earth|earthres|earthresist
-rtefire|rtfire|rte fire|fireres|fireresist
-rtelight|rtlight|rte light|lightres|lightresist
-rtewind|rtwind|rte wind|windres|windresist
-rtewater|rtwater|rte water|waterres|waterresist
-drop|droprate|drop rate
-exp|expgain|exp gain
+text = """\r
+/addr help
+/addr hp
+/addr mp
+/addr ampr
+/addr crit
+/addr acc
+/addr dodge
+/addr agi
+/addr dex
+/addr int
+/addr vit
+/addr str
+/addr atk
+/addr watk
+/addr matk
+/addr fbar
+/addr mbar
+/addr pbar
+/addr mres
+/addr pres
+/addr def
+/addr mdef
+/addr aggro
+/addr -aggro
+/addr dtedark
+/addr dteearth
+/addr dtelight
+/addr dtewater
+/addr dtewind
+/addr dtefire
+/addr dteneutral
+/addr darkres
+/addr earthres
+/addr fireres
+/addr lightres
+/addr windres
+/addr neutralres
+/addr waterres
+/addr drop
+/addr exp
 """
-
 
 
 
@@ -508,7 +507,13 @@ Not available for now
 
 [food_buffs.drop_rate]
 text = """
-Not available for now
+*Food Addresses for Fruit Parfait (Drop Rate%)*
+
+*Level 6*
+4032850 - Aphrodite tiger
+4196969 - ★Shiro☆
+4245922 - ふると系#
+7057777 - t a s t y
 """
 
 [food_buffs.exp_gain]
