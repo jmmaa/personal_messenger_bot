@@ -3,7 +3,8 @@ cookies.json
 __pycache__
 
 
-# personal use
+# secrets
 .eternally_guild_files/*
 .legacy
 scratch*
+.env

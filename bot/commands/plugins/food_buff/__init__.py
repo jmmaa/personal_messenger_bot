@@ -1,6 +1,8 @@
 import typing
 import os
 
+from asyncpg import Pool
+
 from bot.commands import command, name
 from bot.utils import load_toml
 
@@ -15,230 +17,230 @@ def get_food_buff_codes(d: dict[str, typing.Any], key: str):
 
 
 @command
-def addr(_) -> str:
+def addr() -> str:
     return "no impl yet!"
 
 
 @addr.command
-def max_hp(_):
+def max_hp():
     return get_food_buff_codes(data, "max_hp")
 
 
 @addr.command
-def max_mp(_):
+def max_mp():
     return get_food_buff_codes(data, "max_mp")
 
 
 @addr.command
-def attack_mp_recovery(_):
+def attack_mp_recovery():
     return get_food_buff_codes(data, "attack_mp_recovery")
 
 
 @addr.command
-def critical_rate(_):
+def critical_rate():
     return get_food_buff_codes(data, "critical_rate")
 
 
 @addr.command
-def accuracy(_):
+def accuracy():
     return get_food_buff_codes(data, "accuracy")
 
 
 @addr.command
-def dodge(_):
+def dodge():
     return get_food_buff_codes(data, "dodge")
 
 
 @addr.command
-def agi(_):
+def agi():
     return get_food_buff_codes(data, "agi")
 
 
 @addr.command
-def dex(_):
+def dex():
     return get_food_buff_codes(data, "dex")
 
 
 @addr.command
 @name("int")
-def _int(_):
+def _int():
     return get_food_buff_codes(data, "int")
 
 
 @addr.command
-def vit(_):
+def vit():
     return get_food_buff_codes(data, "vit")
 
 
 @addr.command
 @name("str")
-def _str(_):
+def _str():
     return get_food_buff_codes(data, "str")
 
 
 @addr.command
-def atk(_):
+def atk():
     return get_food_buff_codes(data, "atk")
 
 
 @addr.command
 @name("watk")
-def weapon_atk(_):
+def weapon_atk():
     return get_food_buff_codes(data, "weapon_atk")
 
 
 @addr.command
-def matk(_):
+def matk():
     return get_food_buff_codes(data, "matk")
 
 
 @addr.command
 @name("fbar")
-def fractional_barrier(_):
+def fractional_barrier():
     return get_food_buff_codes(data, "fractional_barrier")
 
 
 @addr.command
 @name("mbar")
-def magic_barrier(_):
+def magic_barrier():
     return get_food_buff_codes(data, "magic_barrier")
 
 
 @addr.command
 @name("pbar")
-def physical_barrier(_):
+def physical_barrier():
     return get_food_buff_codes(data, "physical_barrier")
 
 
 @addr.command
 @name("mres")
-def magic_resistance(_):
+def magic_resistance():
     return get_food_buff_codes(data, "magic_resistance")
 
 
 @addr.command
 @name("pres")
-def physical_resistance(_):
+def physical_resistance():
     return get_food_buff_codes(data, "physical_resistance")
 
 
 @addr.command
 @name("def")
-def _def(_):
+def _def():
     return get_food_buff_codes(data, "def")
 
 
 @addr.command
-def mdef(_):
+def mdef():
     return get_food_buff_codes(data, "mdef")
 
 
 @addr.command
-def aggro(_):
+def aggro():
     return get_food_buff_codes(data, "aggro")
 
 
 @addr.command
-def negative_aggro(_):
+def naggro():
     return get_food_buff_codes(data, "negative_aggro")
 
 
 @addr.command
 @name("dtedark")
-def damage_to_dark(_):
+def damage_to_dark():
     return get_food_buff_codes(data, "damage_to_dark")
 
 
 @addr.command
 @name("dteearth")
-def damage_to_earth(_):
+def damage_to_earth():
     return get_food_buff_codes(data, "damage_to_earth")
 
 
 @addr.command
 @name("dtelight")
-def damage_to_light(_):
+def damage_to_light():
     return get_food_buff_codes(data, "damage_to_light")
 
 
 @addr.command
 @name("dtewater")
-def damage_to_water(_):
+def damage_to_water():
     return get_food_buff_codes(data, "damage_to_water")
 
 
 @addr.command
 @name("dtewind")
-def damage_to_wind(_):
+def damage_to_wind():
     return get_food_buff_codes(data, "damage_to_wind")
 
 
 @addr.command
 @name("dtefire")
-def damage_to_fire(_):
+def damage_to_fire():
     return get_food_buff_codes(data, "damage_to_fire")
 
 
 @addr.command
 @name("dteneutral")
-def damage_to_neutral(_):
+def damage_to_neutral():
     return get_food_buff_codes(data, "damage_to_neutral")
 
 
 @addr.command
 @name("darkres")
-def dark_resistance(_):
+def dark_resistance():
     return get_food_buff_codes(data, "dark_resistance")
 
 
 @addr.command
 @name("earthres")
-def earth_resistance(_):
+def earth_resistance():
     return get_food_buff_codes(data, "earth_resistance")
 
 
 @addr.command
 @name("fireres")
-def fire_resistance(_):
+def fire_resistance():
     return get_food_buff_codes(data, "fire_resistance")
 
 
 @addr.command
 @name("lightres")
-def light_resistance(_):
+def light_resistance():
     return get_food_buff_codes(data, "light_resistance")
 
 
 @addr.command
 @name("windres")
-def wind_resistance(_):
+def wind_resistance():
     return get_food_buff_codes(data, "wind_resistance")
 
 
 @addr.command
 @name("neutralres")
-def neutral_resistance(_):
+def neutral_resistance():
     return get_food_buff_codes(data, "neutral_resistance")
 
 
 @addr.command
 @name("waterres")
-def water_resistance(_):
+def water_resistance():
     return get_food_buff_codes(data, "water_resistance")
 
 
 @addr.command
 @name("droprate")
-def drop_rate(_):
+def drop_rate():
     return get_food_buff_codes(data, "drop_rate")
 
 
 @addr.command
 @name("expgain")
-def exp_gain(_):
+def exp_gain():
     return get_food_buff_codes(data, "exp_gain")
 
 
 @addr.command
-def help(_):
-    return data[""]
+def help():
+    return get_food_buff_codes(data, "help")

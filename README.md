@@ -7,13 +7,11 @@ Bot I use for messenger group chats
 
 Things that I plan to work on
 
-- [] allow `dew` parser's keyword parser to parse non-alphanumeric characters 
-- [] move the command framework into `dew` repo as an extension
-- [] allow the command framework to load commands from path
-- [] dependency injection on the commands 
 - [] database
-- [] pyproject.toml
+- [] allow the command framework to load commands from path
+- [] pyproject.toml for bot repo
 - [] tests
+- [] allow different files for config logging
 
 
 For Toram side of things
