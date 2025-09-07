@@ -1,9 +1,8 @@
 import typing
 import os
 
-from asyncpg import Pool
 
-from bot.commands import command, name
+from plugins.command.api import command, name
 from bot.utils import load_toml
 
 
@@ -17,7 +16,7 @@ def get_food_buff_codes(d: dict[str, typing.Any], key: str):
 
 
 @command
-def addr() -> str:
+def addr():
     return "no impl yet!"
 
 

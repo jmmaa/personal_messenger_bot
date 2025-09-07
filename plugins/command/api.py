@@ -1,37 +1,14 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 import typing as t
 import logging
 
-from bot.commands.di import DependencyInjector
-from dew import CommandNode, KwargNodes, parse
+from dew import CommandNode, KwargNodes, get_keyword_seq, get_kwargs
+
+from plugins.command.di import DependencyInjector
+
 
 logging = logging.getLogger(__name__)
-
-
-def get_kwargs(node: CommandNode) -> KwargNodes:
-    tail = node["tail"]
-
-    if isinstance(tail, dict):
-        return get_kwargs(tail)
-
-    else:
-        return tail
-
-
-def get_keyword_seq(node: CommandNode) -> list[str]:
-    return __get_keyword_seq(node, [node["name"]])
-
-
-def __get_keyword_seq(node: CommandNode, acc: list[str]) -> list[str]:
-    tail = node["tail"]
-
-    if isinstance(tail, dict):
-        return __get_keyword_seq(tail, [*acc, tail["name"]])
-
-    else:
-        return acc
 
 
 @dataclass
@@ -59,17 +36,15 @@ class CommandClient:
 
         logging.info(f"registered command '{command.name}'")
 
-    def get_func(self, command: str):
-        inp = parse(command)
+    def get_func(self, command: CommandNode):
+        command_seq = get_keyword_seq(command)
 
-        command_seq = get_keyword_seq(inp)
-
-        kwargs = get_kwargs(inp)
+        kwargs = get_kwargs(command)
 
         func = self.__get_func(self.registry, command_seq)
 
         if func:
-            self.di.set(KwargNodes, kwargs, teardown=None)
+            self.di.set(KwargNodes, kwargs)  # MAKE A MORE UNIQUE TYPE SIGNATURE TO AVOID COLLISION
 
             return self.di.inject(func)
 
@@ -89,7 +64,7 @@ class CommandClient:
         else:
             raise Exception(f"could not find command '{name}'")
 
-    async def execute(self, command: str):
+    async def execute(self, command: CommandNode):
         func = self.get_func(command)
 
         return await func()

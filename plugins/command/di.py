@@ -3,14 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import typing as t
 import inspect
-import sys
-import asyncio
 import logging
 
 T = t.TypeVar("T")
 
 MaybeAwaitable: t.TypeAlias = t.Union[T, t.Awaitable[T]]
-
 
 logging = logging.getLogger(__name__)
 
@@ -24,7 +21,10 @@ async def maybe_await(obj: MaybeAwaitable[T]) -> T:
 
 @dataclass
 class DependencyInjector:
-    _registry: dict[t.Any, tuple[t.Any, t.Callable[[t.Any], MaybeAwaitable[t.Any] | None] | None]]
+    _registry: dict[t.Any, t.Callable[[t.Any], MaybeAwaitable[t.Any] | None]]
+
+    def __str__(self) -> str:
+        return "DependencyInjector"
 
     def set(
         self,
@@ -60,7 +60,7 @@ class DependencyInjector:
                 data = self._registry.get(annot_item[1].annotation)
 
                 if data is not None:
-                    item = self._registry[annot_item[1].annotation][0]
+                    item = self._registry[annot_item[1].annotation]
                     __params[annot_item[0]] = item
 
             result = func(*args, **kwargs, **__params)

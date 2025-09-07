@@ -1,6 +1,12 @@
 import asyncpg
 import typing as t
+import logging
+
 import pydantic
+
+from bot import Bot
+from bot import Plugin
+from plugins.env import Env
 
 
 Pool: t.TypeAlias = asyncpg.Pool
@@ -37,3 +43,30 @@ def get_postgres_dsn_from_env(env: t.Mapping[str, str | None]):
     )
 
     return dsn
+
+
+class DatabasePlugin(Plugin[Bot]):
+    async def load(self, client: Bot):
+        env = client.d.get("env")
+
+        if env:
+            dsn = get_postgres_dsn_from_env(env)
+
+            pool = await asyncpg.create_pool(dsn)
+
+            client.d["pool"] = pool
+
+        else:
+            raise Exception("env not found, is 'env' plugin installed?")
+
+    async def unload(self, client: Bot):
+        pool: Pool = client.d["pool"]
+
+        if pool:
+            await pool.close()
+
+        else:
+            logging.error("pool already closed")
+
+
+__plugin__ = DatabasePlugin()

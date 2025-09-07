@@ -1,122 +1,86 @@
 from __future__ import annotations
 
-import sys
-import asyncio
-from dataclasses import dataclass
-import logging
-import time
-
-import asyncpg
-
-from fbchat_muqit import Client, Message, ThreadType
-
-
-from bot.commands.di import DependencyInjector
-
-
-from bot.config import Config
-from bot.utils import load_toml, load_env
-from bot.commands import CommandClient
-from bot.commands.plugins import food_buff
-from bot.database import Pool, get_postgres_dsn_from_env
-
 
 import abc
-
+import asyncio
+import logging
 import typing as t
+import importlib
+
+from bot.utils import maybe_await
 
 
-class Plugin(abc.ABC):
-    async def load(self, bot: Bot):
+T = t.TypeVar("T")
+
+
+class Plugin(abc.ABC, t.Generic[T]):
+    async def load(self, client: T):
         pass
 
-    async def unload(self, bot: Bot):
+    async def unload(self, client: T):
         pass
 
-    def on_add(self, bot: Bot):
+    def on_add(self, client: T):
         pass
 
-    def on_remove(self, bot: Bot):
+    def on_remove(self, client: T):
         pass
 
 
-class ConfigPlugin(Plugin):
-    def on_add(self, bot: Bot):
-        config = load_toml("config.toml")
+def load_plugin_spec(package: str) -> Plugin[Bot]:
+    module = importlib.import_module(package)
 
-        bot.d["config"] = Config(**config)
+    for symbols in module.__dict__.items():
+        if isinstance(symbols[1], Plugin):
+            return symbols[1]
 
-    def on_remove(self, bot: Bot):
-        del bot.d["config"]
-
-
-class DatabasePlugin(Plugin):
-    async def load(self, bot: Bot):
-        env = load_env()
-
-        dsn = get_postgres_dsn_from_env(env)
-
-        bot.d["database"] = await asyncpg.create_pool(dsn)
-
-    async def unload(self, bot: Bot):
-        pool: asyncpg.Pool = bot.d["database"]
-
-        await pool.close()
+    else:
+        raise Exception(f"could not find 'Plugin' instance in '{package}'")
 
 
-class CommandPlugin(Plugin):
-    async def load(self, bot: Bot):
-        pool: Pool = bot.d["database"]
+def load_plugin_specs(plugins: list[str]) -> list[Plugin[Bot]]:
+    plugin_specs = []
 
-        dependency_manager = DependencyInjector({})
+    for plugin in plugins:
+        plugin_specs.append(load_plugin_spec(plugin))
 
-        dependency_manager.set(Pool, pool)
-
-        client = CommandClient(di=dependency_manager, registry={})
-
-        client.register(food_buff.addr)
-
-        bot.d["command"] = client
+    return plugin_specs
 
 
-class InjectDatabaseToCommandClientPlugin(Plugin):
-    async def load(self, bot: Bot):
-        client: CommandClient = bot.d["command"]
-        pool: Pool = bot.d["database"]
-
-        client.di.set(Pool, pool)
-
-    async def unload(self, bot: Bot):
-        client: CommandClient = bot.d["command"]
-
-        await client.di.unset(Pool)
+_KT = t.TypeVar("_KT")
+_VT = t.TypeVar("_VT")
 
 
-class ToramPlugin(Plugin):
-    async def load(self, bot: Bot):
-        pool: Pool = bot.d["database"]
+class DataStore(dict):
+    def __getitem__(self, key: _KT, /) -> _VT:
+        logging.debug(f"get item in key'{key}' from datastore")
+        return super().__getitem__(key)
 
-        # TODO schema of the database here
-        # TODO toram commands here
+    def __setitem__(self, key: _KT, value: _VT, /) -> None:
+        logging.debug(f"set item '{value}' to '{key}' into datastore")
+        return super().__setitem__(key, value)
+
+    def __delitem__(self, key: _KT, /) -> None:
+        logging.debug(f"deleted '{key}' in datastore")
+        return super().__delitem__(key)
 
 
 class Bot:
-    def __init__(self, d: t.Dict[t.Any, t.Any] = dict(), plugins: list[Plugin] = list()) -> None:
+    def __init__(
+        self,
+        d: DataStore = DataStore(),
+        plugins: list[Plugin[Bot]] = list(),
+        pipeline: list[t.Callable[..., t.Any]] = list(),
+    ) -> None:
         self.d = d
         self.plugins = plugins
-
-        # DEFAULT PLUGIN
-        self.add_plugin(ConfigPlugin())
-        self.add_plugin(DatabasePlugin())
-        self.add_plugin(CommandPlugin())
-        self.add_plugin(InjectDatabaseToCommandClientPlugin())
-
-    async def execute(self, inp: str):
-        return inp
+        self.pipeline = pipeline
 
     def add_plugin(self, plugin: Plugin):
+        logging.info(f"adding plugin '{plugin}'")
         self.plugins.append(plugin)
         plugin.on_add(self)
+        logging.info(f"added plugin '{plugin}'")
 
     def add_plugins(self, plugins: list[Plugin]):
         for plugin in plugins:
@@ -124,6 +88,13 @@ class Bot:
 
     # def remove_plugin(self, name: str)
     # def remove_plugins
+
+    async def execute(self, input: str) -> t.Any:
+        result = input
+        for pipe in self.pipeline:
+            result = await maybe_await(pipe(result))
+
+        return result
 
     async def load_plugins(self):
         for plugin in self.plugins:
@@ -136,7 +107,7 @@ class Bot:
                 await plugin.load(self)
                 logging.info(f"loaded '{plugin}'")
             except Exception as e:
-                logging.error(f"Error unloading '{plugin}': {e}")
+                logging.error(f"Error loading '{plugin}': {e}")
 
     async def unload_plugins(self):
         for plugin in reversed(self.plugins):
@@ -150,207 +121,3 @@ class Bot:
                 logging.info(f"unloaded '{plugin}'")
             except Exception as e:
                 logging.error(f"Error unloading '{plugin}': {e}")
-
-
-async def main():
-    bot = Bot()
-
-    config: Config = bot.d["config"]
-
-    logging.basicConfig(
-        format="%(asctime)s:%(levelname)s:%(name)s: %(message)s",
-        handlers=[
-            logging.FileHandler(config.bot.logging.file),
-            logging.StreamHandler(),
-        ],
-    )
-
-    logging.getLogger().setLevel(logging._nameToLevel[config.bot.logging.level])
-
-    # CUSTOM PLUGINS
-
-    bot.add_plugin(ToramPlugin())
-
-    #
-
-    await bot.load_plugins()
-
-    command_client: CommandClient = bot.d["command"]
-
-    pool: asyncpg.Pool = bot.d["database"]
-
-    if config.bot.shell_mode:
-        if config.bot.shell_mode:
-            try:
-                while True:
-                    inp = input()
-
-                    if inp.startswith(config.bot.prefix):
-                        result = await command_client.execute(inp[1:])
-
-                        print(result)
-
-            except Exception as e:
-                await bot.unload_plugins()
-
-    else:
-
-        class FBClient(Client):
-            async def onMessage(
-                self,
-                mid: str,
-                author_id: str,
-                message: str,
-                message_object: Message,
-                thread_id=None,
-                thread_type=ThreadType.USER,
-                ts=None,
-                metadata=None,
-                msg=None,
-            ):
-                if message.startswith(config.bot.prefix):
-                    result = await command_client.execute(message[1:])
-
-                    await self.sendMessage(
-                        await result,
-                        str(thread_id),
-                        thread_type,
-                        reply_to_id=mid,
-                    )
-
-            async def run(self):
-                while True:
-                    try:
-                        cookies_path = config.bot.fb_client.cookies_path
-
-                    except Exception as e:
-                        raise e
-
-                    session = await self.startSession(cookies_path)
-                    if await session.isLoggedIn():
-                        logging.info("logged in!")
-
-                    try:
-                        await session.listen()
-                    except Exception as e:
-                        logging.error(e)
-
-                        print("retrying connection...")
-                        time.sleep(1)
-
-
-# TODO
-# ADD LOGGING
-# ADD MORE PLUGINS
-# DECIDE THE DATABASE STRUCTURE
-
-# async def main():
-#     bot = Bot()
-
-#     bot.run()
-
-
-# async def main():
-#     # ensure that config is loaded
-#     config_path = "./config.toml"
-
-#     try:
-#         config = Config(**load_toml(config_path))
-
-#         # LOGGING SETUP
-#         logging.basicConfig(
-#             format="%(asctime)s:%(levelname)s:%(name)s: %(message)s",
-#             handlers=[
-#                 logging.FileHandler(config.bot.logging.file),
-#                 logging.StreamHandler(),
-#             ],
-#         )
-
-#         logging.getLogger().setLevel(logging._nameToLevel[config.bot.logging.level])
-
-#         logging.debug(f"loaded config from '{config_path}'")
-
-#     except Exception as e:
-#         logging.error(f"cannot load config from '{config_path}': {e}")
-#         raise e
-
-#     # COMMAND SETUP
-#     di = DependencyInjector({})
-
-#     command_client = CommandClient(di, registry={})
-#     command_client.register(food_buff.addr)
-#     command_client.register(info.info)
-
-#     logging.debug(f"command registry: {command_client.registry}")
-
-#     # DATABASE SETUP
-#     env = load_env()
-#     dsn = get_postgres_dsn_from_env(env)
-#     pool = await asyncpg.create_pool(dsn)
-
-#     async def teardown(pool: Pool):
-#         await pool.close()
-
-#     di.set(Pool, pool, teardown=teardown)
-
-#     # SHELL MODE IF SET TO TRUE
-#     if config.bot.shell_mode:
-#         while True:
-#             try:
-#                 inp = input()
-
-#                 if inp.startswith(config.bot.prefix):
-#                     print(
-#                         "\n",
-#                         await command_client.execute(inp[1:]),
-#                     )
-
-#             except KeyboardInterrupt:
-#                 await di.unset(Pool)
-
-#             except Exception as e:
-#                 print(e)
-#                 continue
-
-#     class _Client(Client):
-#         async def onMessage(
-#             self,
-#             mid: str,
-#             author_id: str,
-#             message: str,
-#             message_object: Message,
-#             thread_id=None,
-#             thread_type=ThreadType.USER,
-#             ts=None,
-#             metadata=None,
-#             msg=None,
-#         ):
-#             if message.startswith(config.bot.prefix):
-#                 result = await command_client.execute(message[1:])
-
-#                 await self.sendMessage(
-#                     await result,
-#                     str(thread_id),
-#                     thread_type,
-#                     reply_to_id=mid,
-#                 )
-
-#     while True:
-#         try:
-#             cookies_path = config.bot.fb_client.cookies_path
-
-#         except Exception as e:
-#             raise e
-
-#         bot = await _Client.startSession(cookies_path)
-#         # if await bot.isLoggedIn():
-#         # fetch_client_info = await bot.fetchUserInfo(bot.uid)
-#         # client_info = fetch_client_info[bot.uid]
-
-#         try:
-#             await bot.listen()
-#         except Exception as e:
-#             logging.error(e)
-
-#             print("retrying connection...")
-#             time.sleep(1)

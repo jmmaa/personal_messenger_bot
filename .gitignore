@@ -1,10 +1,11 @@
-cookies.json
 .venv
 __pycache__
-
+debug.log
 
 # secrets
 .eternally_guild_files/*
 .legacy
 scratch*
 .env
+cookies.json
+

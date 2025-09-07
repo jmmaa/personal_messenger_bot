@@ -1,0 +1,8 @@
+
+
+CREATE TABLE IF NOT EXISTS player (
+
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50)
+)
+
