@@ -1,30 +1,35 @@
 import os
 import logging
 
-from bot import Bot
-from bot import Plugin
-from plugins.db import Pool
+
+from bot import Plugin, Core
+
+from plugins.db import Pool, Record
 
 
 logging = logging.getLogger(__name__)
 
 
-class ToramPlugin(Plugin[Bot]):
-    async def load(self, client):
-        pool: Pool = client.d["pool"]
+class ToramPlugin(Plugin[Core]):
+    async def on_load(self, core):
+        pool = core.d.type_safe_get(Pool, "pool")
 
-        async with pool.acquire() as conn:
-            schema_path = os.path.dirname(__file__) + "\\schema.sql"
-            logging.debug(f"initiating toram database schema from {schema_path}")
+        if isinstance(pool, Pool):  # for some reason this gets a type error if not using `isinstance`
+            async with pool.acquire() as conn:
+                schema_path = os.path.dirname(__file__) + "\\schema.sql"
 
-            with open(schema_path, "r") as f:
-                schema = f.read()
+                logging.debug(f"initiating toram database schema from {schema_path}")
 
-                await conn.execute(schema)
+                with open(schema_path, "r") as f:
+                    schema = f.read()
 
-            logging.debug(f"initiated toram database schema from {schema_path}")
+                    await conn.execute(schema)
 
-    # async def unload(self, client):
+                logging.debug(f"initiated toram database schema from {schema_path}")
+        else:
+            raise Exception("db pool connection not found!, have you installed db plugin?")
+
+    # async def unload(self, core):
 
 
 __plugin__ = ToramPlugin()

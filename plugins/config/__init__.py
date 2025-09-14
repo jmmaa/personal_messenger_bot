@@ -4,7 +4,7 @@ import typing as t
 
 import pydantic
 
-from bot import Bot, Plugin
+from bot import Core, Plugin
 from bot.utils import load_toml
 
 
@@ -28,13 +28,13 @@ class BotLoggingConfig(pydantic.BaseModel):
     level: t.Literal["CRITICAL", "FATAL", "ERROR", "WARN", "WARNING", "INFO", "DEBUG", "NOTSET"] = "NOTSET"
 
 
-class ConfigPlugin(Plugin[Bot]):
-    def on_add(self, client):
+class ConfigPlugin(Plugin[Core]):
+    def on_add(self, core):
         config = load_toml("config.toml")
-        client.d["config"] = Config(**config)
+        core.d["config"] = Config(**config)
 
-    def on_remove(self, client):
-        del client.d["config"]
+    def on_remove(self, core):
+        del core.d["config"]
 
 
 __plugin__ = ConfigPlugin()

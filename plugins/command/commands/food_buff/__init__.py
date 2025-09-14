@@ -36,6 +36,7 @@ def attack_mp_recovery():
 
 
 @addr.command
+@name("crit")
 def critical_rate():
     return get_food_buff_codes(data, "critical_rate")
 

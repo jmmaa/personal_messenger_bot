@@ -1,7 +1,7 @@
 [bot]
 prefix = ">"
 cookies = "cookies.json"
-shell_mode = true
+shell_mode = false
 
 
 [bot.fb_client]
@@ -11,5 +11,7 @@ cookies_path = "cookies.json"
 [bot.logging]
 file = "debug.log"
 level = "DEBUG"
+
+
 
 

@@ -1,12 +1,13 @@
 import asyncio
 import logging
+import sys
 
-from bot import Bot, load_plugin_spec, load_plugin_specs
+from bot import Core, load_plugin_spec, load_plugin_specs
 from plugins.config import Config
 
 
 async def main():
-    bot = Bot()
+    bot = Core()
 
     # default plugin
     bot.add_plugin(load_plugin_spec("plugins.config"))
@@ -29,34 +30,22 @@ async def main():
         [
             "plugins.env",
             "plugins.db",
-            "plugins.toram",
-            "plugins.dew_parser",
+            "plugins.dew",
             "plugins.command",
+            "plugins.toram",
+            "plugins.cli",
+            "plugins.facebook",
         ]
     )
 
     for plugin in plugins:
         bot.add_plugin(plugin)
 
-    await bot.load_plugins()
-
-    if config:
-        if config.bot.shell_mode:
-            if config.bot.shell_mode:
-                try:
-                    while True:
-                        inp = input()
-
-                        if inp.startswith(config.bot.prefix):
-                            result = await bot.execute(inp[1:])
-
-                            print(result)
-
-                except Exception as e:
-                    await bot.unload_plugins()
-
-                    raise e
+    await bot.start()
 
 
 if __name__ == "__main__":
+    if sys.platform.startswith("win"):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     asyncio.run(main())
