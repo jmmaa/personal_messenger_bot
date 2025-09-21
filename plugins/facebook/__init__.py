@@ -1,10 +1,6 @@
-import typing as t
-import asyncio
-import logging
-
 from bot import Core
 from bot.types import Plugin
-from bot.utils import maybe_await
+
 from plugins.command.api import CommandClient
 from plugins.config import Config
 
@@ -79,13 +75,14 @@ class FacebookPlugin(Plugin[Core]):
 
             client = await FBClient.startSession(cookies_path)
 
-            try:
-                await client.listen()
-            except Exception as e:
-                logging.debug(e)
+            core.d["fb_client"] = client
 
-                await client.stopListening()
-                await core.stop()
+            await client.listen()
+
+    async def on_stop(self, core):
+        client = core.d["fb_client"]
+
+        await client.stopListening()
 
 
 __plugin__ = FacebookPlugin()

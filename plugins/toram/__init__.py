@@ -1,10 +1,10 @@
 import os
 import logging
-
+import typing as t
 
 from bot import Plugin, Core
 
-from plugins.db import Pool, Record
+from plugins.db import Pool
 
 
 logging = logging.getLogger(__name__)
@@ -12,9 +12,9 @@ logging = logging.getLogger(__name__)
 
 class ToramPlugin(Plugin[Core]):
     async def on_load(self, core):
-        pool = core.d.type_safe_get(Pool, "pool")
+        pool = t.cast(Pool | None, core.d.get("pool"))
 
-        if isinstance(pool, Pool):  # for some reason this gets a type error if not using `isinstance`
+        if pool:
             async with pool.acquire() as conn:
                 schema_path = os.path.dirname(__file__) + "\\schema.sql"
 
