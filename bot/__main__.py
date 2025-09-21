@@ -29,7 +29,7 @@ async def main():
     plugins = load_plugin_specs(
         [
             "plugins.env",
-            "plugins.db",
+            # "plugins.db", # ill include this later
             "plugins.dew",
             "plugins.command",
             "plugins.toram",
@@ -38,8 +38,7 @@ async def main():
         ]
     )
 
-    for plugin in plugins:
-        bot.add_plugin(plugin)
+    bot.add_plugins(plugins)
 
     await bot.start()
 
