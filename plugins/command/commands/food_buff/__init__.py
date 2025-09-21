@@ -31,6 +31,7 @@ def max_mp():
 
 
 @addr.command
+@name("ampr")
 def attack_mp_recovery():
     return get_food_buff_codes(data, "attack_mp_recovery")
 
