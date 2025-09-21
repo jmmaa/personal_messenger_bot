@@ -73,7 +73,7 @@ class DatabasePlugin(Plugin[Core]):
             raise Exception("env not found, is 'env' plugin installed?")
 
     async def on_unload(self, core: Core):
-        pool: Pool = core.d["pool"]
+        pool = t.cast(Pool | None, core.d["pool"])
 
         if pool:
             await pool.close()
