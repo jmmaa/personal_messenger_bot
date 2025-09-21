@@ -1,6 +1,5 @@
 [bot]
 prefix = ">"
-cookies = "cookies.json"
 shell_mode = false
 
 
