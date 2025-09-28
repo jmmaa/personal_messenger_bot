@@ -19,5 +19,10 @@ then you can run
 python3.11 -m yui
 ```
 
+### Todo
+
+- better command handling
+- calc module
+
 
 
