@@ -2,10 +2,8 @@
 prefix = ">"
 shell_mode = false
 
-
 [bot.fb_client]
-cookies_path = "cookies.json"
-
+cookies_path = "./cookies.json"
 
 [bot.logging]
 file = "debug.log"
