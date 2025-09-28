@@ -1,4 +1,4 @@
-# Personal Messenger Bot
+# Yui
 
 Bot I use for messenger group chats
 
@@ -9,10 +9,8 @@ Things that I plan to work on
 
 - [] database
 - [] allow the command framework to load commands from path
-- [] pyproject.toml for bot repo
 - [] tests
 - [] allow different files for config logging
-
 
 For Toram side of things
 
