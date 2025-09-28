@@ -9,7 +9,7 @@ T = t.TypeVar("T")
 
 MaybeAwaitable: t.TypeAlias = t.Union[T, t.Awaitable[T]]
 
-logging = logging.getLogger(__name__)
+logging = logging.getLogger("yui")
 
 
 async def maybe_await(obj: MaybeAwaitable[T]) -> T:
