@@ -1,7 +1,7 @@
 import asyncio
 import sys
 
-from yui.kernel import Kernel
+from yui import Kernel
 
 
 async def main():
@@ -15,7 +15,7 @@ async def main():
             "modules.lifecycle",
             "modules.command_parser",
             "modules.command",
-            # "modules.shell",
+            "modules.shell",
             "modules.facebook",
             "modules.run",
         ]
