@@ -29,9 +29,9 @@ class BotLoggingConfig(pydantic.BaseModel):
     level: t.Literal["CRITICAL", "FATAL", "ERROR", "WARN", "WARNING", "INFO", "DEBUG", "NOTSET"] = "NOTSET"
 
 
-async def load(kernel: Kernel):
+def load(kernel: Kernel):
     kernel.cache["__CONFIG__"] = Config(**load_toml("./config.toml"))
 
 
-async def unload(kernel: Kernel):
+def unload(kernel: Kernel):
     del kernel.cache["__CONFIG__"]

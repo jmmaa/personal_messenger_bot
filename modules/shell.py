@@ -1,5 +1,5 @@
 import logging
-
+import asyncio
 
 from yui import Kernel
 from modules.lifecycle import StartedEvent
@@ -17,6 +17,9 @@ async def start_shell(event: StartedEvent):
                     inp = input()
 
                     print(inp)
+
+            except asyncio.CancelledError as e:
+                logger.debug(e)
 
             except Exception as e:
                 logger.debug(e)

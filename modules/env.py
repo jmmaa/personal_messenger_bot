@@ -7,9 +7,9 @@ class Env(dict):
         return "I hide this sht cause it got some sensitive details :)"
 
 
-async def load(kernel: Kernel):
+def load(kernel: Kernel):
     kernel.cache["__ENV__"] = Env(**load_env())
 
 
-async def unload(kernel: Kernel):
+def unload(kernel: Kernel):
     del kernel.cache["__ENV__"]
