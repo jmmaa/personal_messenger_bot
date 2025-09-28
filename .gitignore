@@ -2,6 +2,10 @@
 __pycache__
 debug.log
 
+# build
+dist
+*.egg-info
+
 # secrets
 .eternally_guild_files/*
 .legacy
