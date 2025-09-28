@@ -12,4 +12,4 @@ dist
 scratch*
 .env
 cookies.json
-
+scripts/scp_cookies_to_rpi.bat
