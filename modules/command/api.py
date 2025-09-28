@@ -69,6 +69,9 @@ class CommandClient:
 
         return await func()
 
+    def command(self, func: t.Callable[..., t.Any | None]) -> Command:
+        return Command(func.__name__, func, {})
+
 
 def command(func: t.Callable[..., t.Any | None]) -> Command:
     return Command(func.__name__, func, {})

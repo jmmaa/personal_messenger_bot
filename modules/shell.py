@@ -9,14 +9,21 @@ logger = logging.getLogger("yui")
 
 async def start_shell(event: StartedEvent):
     config = event.kernel.cache.get("__CONFIG__")
+    command_client = event.kernel.cache.get("__COMMAND_CLIENT__")
+    parse_command = event.kernel.cache.get("__COMMAND_PARSER__")
 
-    if config:
+    if config and command_client and parse_command:
         if config.bot.shell_mode:
             try:
                 while True:
                     inp = input()
 
-                    print(inp)
+                    if inp.startswith(config.bot.prefix):
+                        cmd = inp[1:]
+
+                        result = await command_client.execute(parse_command(cmd))
+
+                        print(result)
 
             except asyncio.CancelledError as e:
                 logger.debug(e)
