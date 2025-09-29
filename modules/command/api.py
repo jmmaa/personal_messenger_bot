@@ -31,6 +31,9 @@ class CommandClient:
     di: DependencyInjector
     registry: CommandRegistry
 
+    def __str__(self) -> str:
+        return "CommandClient"
+
     def register(self, command: Command):
         self.registry[command.name] = command
 

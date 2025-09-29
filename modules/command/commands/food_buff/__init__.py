@@ -167,6 +167,7 @@ def aggro():
 
 
 @addr.command
+@name("-aggro")
 def naggro():
     return get_food_buff_codes(data, "negative_aggro")
 
