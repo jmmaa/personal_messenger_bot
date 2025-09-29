@@ -7,7 +7,7 @@ Bot I use for messenger group chats
 
 ### How to run
 
-Install `Yui`
+Clone this repo `Yui`
 
 ```sh
 python3.11 -m pip install git+https://github.com/jmmaa/yui.git
@@ -22,7 +22,11 @@ python3.11 -m yui
 ### Todo
 
 - better command handling
+    - refactor
+    - make it a standalone module
+
 - calc module
+    - simpleeval
 
 
 
