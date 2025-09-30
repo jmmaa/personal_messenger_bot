@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 
+import aiomqtt
 from fbchat_muqit import Client, ThreadType, Message
 
 
@@ -80,10 +81,17 @@ async def start_client(event: StartedEvent):
 
         event.kernel.cache["__FACEBOOK_CLIENT__"] = client
 
-        try:
-            await client.listen()
-        except asyncio.CancelledError as e:
-            logger.debug(e)
+        while True:
+            try:
+                await client.listen()
+
+            except asyncio.CancelledError as e:
+                logger.debug("listening cancelled on facebook client")
+                break
+
+            except Exception as e:
+                logger.debug(e)
+                logger.debug("reconnecting...")
 
 
 async def stop_client(event: StoppingEvent):
