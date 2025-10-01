@@ -93,6 +93,8 @@ async def start_client(event: StartedEvent):
                 logger.debug(e)
                 logger.debug("reconnecting...")
 
+                await asyncio.sleep(3)
+
 
 async def stop_client(event: StoppingEvent):
     client = event.kernel.cache["__FACEBOOK_CLIENT__"]
