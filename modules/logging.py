@@ -1,6 +1,4 @@
 from yui.kernel import Kernel
-from modules.lifecycle import StartEvent, StopEvent
-
 
 import logging
 
