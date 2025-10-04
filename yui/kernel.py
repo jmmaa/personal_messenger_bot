@@ -73,8 +73,9 @@ class EventManager:
         callbacks = self.mapping.get(key)
 
         if callbacks is not None:
+            logger.debug(f"emitting event '{event}'")
             for callback in self.mapping[key]:
-                logger.debug(f"emitting event '{event}'")
+                logger.debug(f"calling '{callback.__name__}'")
                 await maybe_await(callback(event))
 
         else:
@@ -83,15 +84,15 @@ class EventManager:
 
 class Cache(dict):
     def __getitem__(self, key, /):
-        logger.debug(f"get item in key'{key}' from datastore")
+        logger.debug(f"get item in key'{key}' from cache")
         return super().__getitem__(key)
 
     def __setitem__(self, key, value, /) -> None:
-        logger.debug(f"set item '{value}' to '{key}' into datastore")
+        logger.debug(f"set item '{value}' to '{key}' into cache")
         return super().__setitem__(key, value)
 
     def __delitem__(self, key, /) -> None:
-        logger.debug(f"deleted '{key}' in datastore")
+        logger.debug(f"deleted '{key}' in cache")
         return super().__delitem__(key)
 
 
