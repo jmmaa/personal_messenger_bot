@@ -110,6 +110,7 @@ async def start_client(event: StartedEvent):
                 msg=None,
             ):
                 if not is_throttled():
+                    await asyncio.sleep(1)
                     fb_message = FBMessage(
                         text=message,
                         mid=mid,
