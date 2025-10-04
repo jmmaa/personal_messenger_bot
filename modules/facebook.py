@@ -95,7 +95,6 @@ async def start_client(event: StartedEvent):
     is_throttled = throttle(2)(lambda: None)
 
     if config:
-        print("STARTING CLIENT!!!!")
 
         class FBClient(Client):
             async def onMessage(
@@ -133,6 +132,7 @@ async def start_client(event: StartedEvent):
                 await client.listen()
 
             except asyncio.CancelledError as e:
+                logger.debug(e)
                 logger.debug("listening cancelled on facebook client")
                 break
 
