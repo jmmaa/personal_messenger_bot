@@ -13,9 +13,9 @@ async def main():
             "modules.env",
             "modules.logging",
             "modules.lifecycle",
-            "modules.command_parser",
-            "modules.command",
+            "modules.cmd",
             "modules.shell",
+            "modules.toram",
             "modules.facebook",
             "modules.run",
         ]
