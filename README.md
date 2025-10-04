@@ -10,13 +10,18 @@ Bot I use for messenger group chats
 Clone this repo `Yui`
 
 ```sh
-python3.11 -m pip install git+https://github.com/jmmaa/yui.git
+git clone https://github.com/jmmaa/yui.git
 ```
 
-then you can run
+then run the build script `scripts/build`
 
 ```sh
-python3.11 -m yui
+scripts/build
+```
+
+then `scripts/run`
+```sh
+scripts/run
 ```
 
 ### Todo
