@@ -9,6 +9,11 @@ logger = logging.getLogger("yui")
 
 @dataclass
 class StartEvent:
+    """This is a single point starter for all events in the lifecycle
+    and is fired when starting the lifecycle. MUST NOT BE USED for
+    your custom listeners, define the listener instead in the
+    `load` function of a module"""
+
     kernel: Kernel
 
 
@@ -34,6 +39,11 @@ class StoppedEvent:
 
 @dataclass
 class StopEvent:
+    """This is a single point stopper for all events in the lifecycle
+    this is fired when stopping the lifecycle. MUST NOT BE USED for
+    your custom listeners, define the listener instead in the
+    `unload` function of a module"""
+
     kernel: Kernel
 
 
