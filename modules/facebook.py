@@ -1,16 +1,19 @@
-import asyncio
-import logging
-
-
-import aiomqtt
-from fbchat_muqit import Client, ThreadType, Message
-
-
-import time
+from dataclasses import dataclass
 from functools import wraps
 
+import time
+import asyncio
+import logging
+import typing as t
+
+from fbchat_muqit import Client, ThreadType, Message
+import dew
+import linkd
+
+from modules.cmd.api import CommandTree
 from yui.kernel import Kernel
 from modules.lifecycle import StartedEvent, StoppingEvent
+from yui.types import MaybeAwaitable
 
 
 logger = logging.getLogger("yui")
@@ -44,14 +47,55 @@ def throttle(delay_seconds):
     return decorator
 
 
+@dataclass
+class FBMessage:
+    text: str
+    mid: str
+    author_id: str
+    message_object: Message
+    thread_id: str
+    thread_type: ThreadType
+
+
+@dataclass
+class FBMessageReceivedEvent:
+    message: FBMessage
+    kernel: Kernel
+
+
+async def execute_legacy_fb_command(event: FBMessageReceivedEvent):
+    di = t.cast(linkd.DependencyInjectionManager, event.kernel.cache["__LEGACY_CMD_DI_API__"])
+    tree = t.cast(CommandTree, event.kernel.cache["__LEGACY_CMD_API__"])
+    fb_client = t.cast(Client, event.kernel.cache["__FACEBOOK_CLIENT__"])
+
+    prefix = ">"
+    if event.message.text.startswith(prefix):
+        message = event.message.text[1:]
+        command_sequence = dew.get_keyword_seq(dew.parse(message))
+
+        func = t.cast(
+            t.Callable[..., MaybeAwaitable[t.Any | None]], tree.get_tree([prefix, *command_sequence]).data.func
+        )
+
+        di_injected_func = di.contextual(linkd.Contexts.ROOT)(linkd.inject(func))
+
+        result = await di_injected_func()
+
+        await fb_client.sendMessage(
+            str(result), str(event.message.thread_id), event.message.thread_type, reply_to_id=event.message.mid
+        )
+
+    else:
+        logger.debug(f"cmd is not recognized as it is not starting with prefix '{prefix}'")
+
+
 async def start_client(event: StartedEvent):
     config = event.kernel.cache.get("__CONFIG__")
-    command_client = event.kernel.cache.get("__COMMAND_CLIENT__")
-    parse_command = event.kernel.cache.get("__COMMAND_PARSER__")
 
     is_throttled = throttle(2)(lambda: None)
 
-    if config and parse_command and command_client:
+    if config:
+        print("STARTING CLIENT!!!!")
 
         class FBClient(Client):
             async def onMessage(
@@ -66,14 +110,17 @@ async def start_client(event: StartedEvent):
                 metadata=None,
                 msg=None,
             ):
-                # author_id is message sender ID
-                if message.startswith(config.bot.prefix):
-                    await asyncio.sleep(1)
-                    node = parse_command(message[1:])
-                    result = await command_client.execute(node)
-
-                    if not is_throttled():
-                        await self.sendMessage(result, str(thread_id), thread_type, reply_to_id=mid)
+                if not is_throttled():
+                    fb_message = FBMessage(
+                        text=message,
+                        mid=mid,
+                        author_id=author_id,
+                        message_object=message_object,
+                        thread_id=str(thread_id),
+                        thread_type=thread_type,
+                    )
+                    await event.kernel.event_manager.emit(FBMessageReceivedEvent(fb_message, event.kernel))
+                    # await self.sendMessage(result, str(thread_id), thread_type, reply_to_id=mid)
 
         cookies_path = config.bot.fb_client.cookies_path
 
@@ -93,7 +140,7 @@ async def start_client(event: StartedEvent):
                 logger.debug(e)
                 logger.debug("reconnecting...")
 
-                await asyncio.sleep(3)
+                time.sleep(3)
 
 
 async def stop_client(event: StoppingEvent):
@@ -106,6 +153,14 @@ async def load(kernel: Kernel):
     kernel.event_manager.subscribe(StartedEvent, start_client)
     kernel.event_manager.subscribe(StoppingEvent, stop_client)
 
+    # for capturing events that needs commands
+    kernel.event_manager.add_event(FBMessageReceivedEvent)
+    kernel.event_manager.subscribe(FBMessageReceivedEvent, execute_legacy_fb_command)
+
 
 async def unload(kernel: Kernel):
     kernel.event_manager.unsubscribe(StartedEvent, start_client)
+
+    # for removing events that needs commands
+    kernel.event_manager.unsubscribe(FBMessageReceivedEvent, execute_legacy_fb_command)
+    kernel.event_manager.remove_event(FBMessageReceivedEvent)
