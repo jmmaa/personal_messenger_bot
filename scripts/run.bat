@@ -1,4 +1,2 @@
-
-call ".venv/Scripts/Activate"
-
-call python -m yui
+call ".venv/Scripts/activate"
+python -m yui
