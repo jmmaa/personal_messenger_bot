@@ -30,3 +30,8 @@ def stat_calc_sheet() -> str:
 @info.command(name="bsprof")
 def blacksmith_prof_leveling() -> str:
     return data["info"]["blacksmith_prof_leveling"]["text"]
+
+
+@info.command(name="traitfarm")
+def trait_farm_locations() -> str:
+    return data["info"]["trait_farm_locations"]["text"]
