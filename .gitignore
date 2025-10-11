@@ -1,6 +1,6 @@
 .venv
 __pycache__
-debug.log
+*.log
 
 # build
 dist

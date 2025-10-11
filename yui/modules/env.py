@@ -8,8 +8,8 @@ class Env(dict):
 
 
 def load(kernel: Kernel):
-    kernel.cache["__ENV__"] = Env(**load_env())
+    kernel.store["__ENV__"] = Env(**load_env())
 
 
 def unload(kernel: Kernel):
-    del kernel.cache["__ENV__"]
+    del kernel.store["__ENV__"]

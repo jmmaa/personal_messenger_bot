@@ -5,16 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">=3.11,<=3.12"
 name = "yui"
-description= "Bot I use for messenger group chats"
+description= "a minimal core for generic bot apps"
 dynamic = ["version", "readme"]
 authors = [
     {name = "jma"},
 ]
 
 dependencies = [
-    "dew-py @ git+https://github.com/jmmaa/dew.git@4ba4ebf7583c06f4952f18b06d2857947f1cfd85",
-    "fbchat-muqit==1.1.2",
-    "asyncpg==0.26.0",
     "python-dotenv==1.1.1",
     "pydantic==2.11.7",
     "pydantic_core==2.33.2",

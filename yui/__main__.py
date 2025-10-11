@@ -7,24 +7,32 @@ from yui import Kernel
 async def main():
     kernel = Kernel()
 
-    await kernel.load_modules(
+    kernel.add_modules_from_packages(
         [
-            "modules.config",
-            "modules.env",
-            "modules.logging",
-            "modules.lifecycle",
-            "modules.cmd",
-            "modules.shell",
-            "modules.toram",
-            "modules.facebook",
-            "modules.run",
+            "yui.modules.config",
+            "yui.modules.env",
+            "yui.modules.logging",
+            "yui.modules.lifecycle",
+            "yui.modules.cmd",
+            # "yui.modules.shell",
+            # "modules.toram",
+            # "modules.facebook",
         ]
     )
 
-    await kernel.unload_modules()
+    await kernel.boot()
+
+    # this api is only available if you have 'yui.modules.lifecycle' module added
+    # starts the program
+    await kernel.emit("kernel:lifecycle:start", kernel)
+
+    # stops the program
+    await kernel.emit("kernel:lifecycle:stop", kernel)
+
+    await kernel.shutdown()
 
 
 if __name__ == "__main__":
-    if sys.platform.startswith("win"):
+    if sys.platform.startswith("win"):  # this is needed to run fbchat
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(main())

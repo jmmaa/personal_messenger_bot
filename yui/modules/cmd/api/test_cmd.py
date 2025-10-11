@@ -1,5 +1,5 @@
-from modules.cmd.api import Command
-from modules.cmd.api import CommandTree
+from yui.modules.cmd.api import Command
+from yui.modules.cmd.api import CommandTree
 
 
 def test_command_api():
